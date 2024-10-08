@@ -4,16 +4,14 @@ LemonTizer is a class that wraps the [spacy](https://spacy.io) library to build 
 
 It is designed so that lemmatization can be enabled for multiple languages with the same amount of effort as enabling it for one, thus making community made scripts more widely accessible.
 
-`lemon_tizer.py` is fully documented to make it easier to make changes.
-
-(for those curious, lemon tizer is a pun on the [Scottish soft drink](https://en.wikipedia.org/wiki/Tizer) which comes in various fruit flavours)
+(for those curious, lemon tizer is a pun on the [Scottish soft drink](https://en.wikipedia.org/wiki/Tizer) which used to come in various fruit flavours)
 
 # Quickstart
 
-First, install spacy using pip:
+First, install lemon-tizer using pip:
 
 ```bash
-pip install spacy
+pip install lemon-tizer
 ```
 
 Example of lemmatizing a single sentence:
