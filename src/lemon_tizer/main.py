@@ -9,6 +9,7 @@ For class constructor:
 Attributes:
     __init__: Relevant spacy model ("trained pipeline") is downloaded and loaded upon 
         class instanciation.
+    set_lemma_settings: To configure parameters for lemmatization
     lematize_sentence: This is the main method for processing text
     
 External module requirements:
@@ -33,6 +34,7 @@ class LemonTizer:
     Attributes:
         __init__: Relevant spacy model ("trained pipeline") is downloaded and loaded upon 
             class instanciation.
+        set_lemma_settings: To configure parameters for lemmatization
         lematize_sentence: This is the main method for processing text
 
     External module requirements:
@@ -41,43 +43,46 @@ class LemonTizer:
 
     _nlp: spacy.language.Language
     _model_name: str
+    _filter_out_non_alpha: bool
+    _filter_out_common: bool
+    _convert_input_to_lower: bool
+    _convert_output_to_lower: bool
+    _return_just_first_word_of_lemma: bool
 
-    def __init__(self, language: str, model_size: str = "lg") -> None:
+    def __init__(self, language: str = "en", model_size: str = "lg") -> None:
         self.init_model(language=language, model_size=model_size)
 
     def init_model(self, language: str, model_size: str) -> None:
         """Loads model based upon specified language and model size.
-        If model hasn't been downloaded, it will download it prior to the loading step
+        If model hasn't been downloaded, it will download it prior to the loading step.
+        Also loads default settings for lemmatization.
 
         Args:
             language: Lower case two letter code matching language codes in https://spacy.io/models
             model_size: Lower case two letter code matching sm, md, lg, etc. 
                 in https://spacy.io/models
         """
+
+        # Set default settings
+        self.set_lemma_settings()
+
+        # Get model name
         model_name = self.find_model_name(language=language, model_size=model_size)
 
+        # Load model, downloading it first if necessary
         if self.is_model_installed(model_name):
             self._load_model(model_name=model_name)
         else:
             self.download_model(model_name=model_name)
             self._load_model(model_name=model_name)
 
-    def lemmatize_sentence(
-        self,
-        input_str: str,
-        filter_out_non_alpha: bool = True,
+    def set_lemma_settings(self, filter_out_non_alpha: bool = False,
         filter_out_common: bool = False,
         convert_input_to_lower: bool = False,
         convert_output_to_lower: bool = False,
-        return_just_first_word_of_lemma: bool = False,
-    ) -> dict[str, str]:
-        """Lemmatizes a sentence (can also be a word, paragraph, etc.)
-        Returns:
-            Dictionary which has the original token as the key (str) and lemmatized token as the 
-            value (str)
-
+        return_just_first_word_of_lemma: bool = False) -> None:
+        """ Sets various settings for lemmatisation
         Args:
-            input_str: String containing the data to be lemmatized
             filter_out_non_alpha: (bool) Will filter out lemmatizations that contain non-alpha 
                 characters. Useful for removing punctuation, etc. Note: lemmatizations with an
                 apostrophe will also be filtered if this is set!
@@ -89,21 +94,39 @@ class LemonTizer:
             return_just_first_word_of_lemma: (bool) Some lemmatizations will return multiple words
                 for a given input token. Setting this to True will return just the first word.
         """
+        self._filter_out_non_alpha = filter_out_non_alpha
+        self._filter_out_common = filter_out_common
+        self._convert_input_to_lower = convert_input_to_lower
+        self._convert_output_to_lower = convert_output_to_lower
+        self._return_just_first_word_of_lemma = return_just_first_word_of_lemma
+
+    def lemmatize_sentence(
+        self,
+        input_str: str,
+    ) -> list[dict[str, str]]:
+        """Lemmatizes a sentence (can also be a word, paragraph, etc.)
+        Returns:
+            Lists of dictionaries which has the original token as the key (str) and lemmatized 
+            token as the value (str)
+
+        Args:
+            input_str: String containing the data to be lemmatized
+        """
 
         # Pre-process input. Converting to lower can provide better performance with some languages
-        if convert_input_to_lower:
+        if self._convert_input_to_lower:
             input_str = input_str.lower()
 
         # Process the input string with spacy
         doc = self._nlp(text=input_str)
 
         # Get the lemmas for each token
-        word_dict: dict[str, str] = {}
+        word_list: list[dict[str, str]] = []
         for token in doc:
 
-            # Work out whether to skip the
-            is_not_word = (not token.is_alpha) and filter_out_non_alpha
-            is_common = token.is_stop and filter_out_common
+            # Skip word, depending on settings and properties of the token
+            is_not_word = (not token.is_alpha) and self._filter_out_non_alpha
+            is_common = token.is_stop and self._filter_out_common
             skip_word = is_not_word or is_common
 
             if skip_word:
@@ -112,16 +135,17 @@ class LemonTizer:
             # Get lemma for current token and post-process
             lemma = token.lemma_
 
-            if return_just_first_word_of_lemma:
+            if self._return_just_first_word_of_lemma:
                 lemma = lemma.split()[0]
 
-            if convert_output_to_lower:
+            if self._convert_output_to_lower:
                 lemma = lemma.lower()
 
             # Output dictionary is orginal token: lemma
-            word_dict[token.text] = lemma
+            word_dict = {token.text: lemma}
+            word_list.append(word_dict)
 
-        return word_dict
+        return word_list
 
     def find_model_name(self, language: str, model_size: str) -> str:
         """Looks up models compatible with the installed version of spacy, based upon language code
@@ -150,6 +174,7 @@ class LemonTizer:
 
             return output
 
+        # Otherwise, there is an error
         # Work out if the language is supported in order to raise the correct error messages
         regex = re.compile(f"^{language}")
         matched_models = list(filter(regex.match, available_models))
