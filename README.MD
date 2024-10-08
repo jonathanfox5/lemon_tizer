@@ -6,7 +6,7 @@ It is designed so that lemmatization can be enabled for multiple languages with 
 
 `lemon_tizer.py` is fully documented to make it easier to make changes.
 
-(for those curious, lemmon tizer is a pun on the [Scottish soft drink](https://en.wikipedia.org/wiki/Tizer) which comes in various fruit flavours)
+(for those curious, lemon tizer is a pun on the [Scottish soft drink](https://en.wikipedia.org/wiki/Tizer) which comes in various fruit flavours)
 
 # Quickstart
 
