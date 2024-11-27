@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "lemon_tizer"
 version = "0.0.4"
 authors = [
-  { name="Jonathan Fox", email="author@example.com" },
+  { name="Jonathan Fox"},
 ]
 description = "LemonTizer is a class that wraps the spacy library to build a lemmatizer for language learning applications."
 readme = "README.md"
