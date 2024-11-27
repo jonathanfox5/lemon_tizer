@@ -4,17 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lemon_tizer"
-version = "0.0.4"
+version = "0.0.7"
 authors = [
   { name="Jonathan Fox"},
 ]
 description = "LemonTizer is a class that wraps the spacy library to build a lemmatizer for language learning applications."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = { text = "MIT License" }
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 keywords = ["lemmatizer", "spacy", "wrapper"]
